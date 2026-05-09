@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Summarizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        h3 {
+            text-align: center;
+            color: #666;
+        }
+        p {
+            text-align: center;
+            color: #555;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #summary-output {
+            margin-top: 20px;
+        }
+        #summary-heading {
+            color: #333;
+        }
+        #summary-text {
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text Summarizer</h1>
+        <h3>Using HuggingFace Transformers</h3>
+        <p>Write or Paste your content below for quick summarization.</p>
+        <form id="summarization-form" action="">
+            <textarea name="" id="dialogue-input" placeholder="Enter text to summarize..." required></textarea>
+            <button type="submit">Summarize</button>
+        </form>
+
+        <div id="summary-output">
+            <h3 id="summary-heading">Content Summary</h3>
+            <p id="summary-text"></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('summarization-form').addEventListener('submit', async(e)=> {
+            e.preventDefault();
+
+            //get reference to elements
+            const dialogueInput = document.getElementById('dialogue-input');
+            const summaryText = document.getElementById('summary-text');
+            const submitButton = e.target.querySelector('button');
+
+            const dialogue = dialogueInput.value.trim();
+            if (!dialogue) return;
+
+            //show processing message and disable button
+            summaryText.innerText = 'Processing...';
+            submitButton.disabled = true;
+            
+
+            try {
+                const response = await fetch('/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ dialogue: dialogue })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                summaryText.innerText = data.summary || 'No summary available.';
+            } catch (error) {
+                console.error('Error:', error);
+                summaryText.innerText = `Error: ${error.message}`;
+            } finally {submitButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
